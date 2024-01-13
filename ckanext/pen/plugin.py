@@ -178,7 +178,10 @@ class PenPlugin(plugins.SingletonPlugin):
     def logout(self):
         session.pop(ckey.idp.token, None)
         session.pop(ckey.idp.userinfo, None)
-    
+
+    def abort(self, *args, **kwargs):
+        return args
+        
     def authenticate(self, identity):
         # This method is for default login flow where identity contains username and password
         pass
