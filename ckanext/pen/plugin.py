@@ -227,9 +227,11 @@ class PenPlugin(plugins.SingletonPlugin):
                 email=ckey.idp.email_claim,
                 fullname=ckey.idp.fullname_claim
             )
-            args = {k:claims[v] for k,v in keys.items() if v in claims}
+            claim_keys = {k:self.config[v()] for k,v in keys.items()}
+            args = {k:claims[v] for k,v in claim_keys.items() if v in claims}
             userobj = model.User(**args)
             model.Session.add(userobj)
+            model.Session.flush() # assign .id
     
         autogroup = self.config[ckey.idp.autogroup]
         if autogroup:
@@ -237,8 +239,12 @@ class PenPlugin(plugins.SingletonPlugin):
                 if re.match(autogroup, g):
                     group = model.Group.by_name(g)
                     if group is None:
-                        group = model.Group(name=g, type="group")
+                        group = model.Group(
+                            name=g, title=g, type="organization", is_organization=True,
+                            description="created by ckanext-pen autogroup, synced with identity provider."
+                        )
                         model.Session.add(group)
+                        model.Session.flush() # assign .id
                     if not userobj.is_in_group(group.id):
                         member = model.Member(
                             table_name="user",
