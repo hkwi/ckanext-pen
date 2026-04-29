@@ -1,4 +1,4 @@
-FROM ckan/ckan-dev:2.11.4-py3.10
+FROM ckan/ckan-dev:2.11.5-py3.10
 
 USER root
 WORKDIR /srv/ckanext-pen
