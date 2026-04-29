@@ -1,131 +1,135 @@
-[![Tests](https://github.com/Github user or organization name/ckanext-pen/workflows/Tests/badge.svg?branch=main)](https://github.com/Github user or organization name/ckanext-pen/actions)
+[![E2E](https://github.com/hkwi/ckanext-pen/actions/workflows/e2e.yml/badge.svg?branch=main)](https://github.com/hkwi/ckanext-pen/actions/workflows/e2e.yml)
 
 # ckanext-pen
 
-ckan OpenID Connect auth extension.
-
+`ckanext-pen` is a CKAN extension that replaces the CKAN login flow with an
+OpenID Connect login flow. It uses Authlib to authenticate with an external
+identity provider, creates CKAN users from OIDC claims, and can synchronize OIDC
+group claims into CKAN organizations.
 
 ## Requirements
 
-**TODO:** In development on CKAN 2.10.
+| Component | Version used by this repository |
+| --- | --- |
+| CKAN | 2.11.4 in the Docker test image |
+| Python | 3.10 in the Docker test image |
+| Authlib | 1.7.0 |
 
-
-| CKAN version    | Compatible?   |
-| --------------- | ------------- |
-| 2.9             | not tested    |
-
-Suggested values:
-
-* "yes"
-* "not tested" - I can't think of a reason why it wouldn't work
-* "not yet" - there is an intention to get it working
-* "no"
-
+CKAN 2.11 is the tested target. Other CKAN versions are not currently covered by
+the test suite.
 
 ## Installation
 
-**TODO:** Add any additional install steps to the list below.
-   For example installing any non-Python dependencies or adding any required
-   config settings.
+Activate your CKAN virtual environment, then install the extension:
 
-To install ckanext-pen:
+```sh
+git clone https://github.com/hkwi/ckanext-pen.git
+cd ckanext-pen
+pip install -e .
+```
 
-1. Activate your CKAN virtual environment, for example:
+Add `pen` to `ckan.plugins` in your CKAN configuration:
 
-     . /usr/lib/ckan/default/bin/activate
+```ini
+ckan.plugins = pen
+```
 
-2. Clone the source and install it on the virtualenv
+Configure the OpenID Connect identity provider settings described below, then
+restart CKAN.
 
-    git clone https://github.com/Github user or organization name/ckanext-pen.git
-    cd ckanext-pen
-    pip install -e .
-	pip install -r requirements.txt
+## Configuration
 
-3. Add `pen` to the `ckan.plugins` setting in your CKAN
-   config file (by default the config file is located at
-   `/etc/ckan/default/ckan.ini`).
+Minimum OIDC configuration:
 
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+```ini
+ckanext.pen.idp.client_id = your-client-id
+ckanext.pen.idp.client_secret = your-client-secret
+ckanext.pen.idp.server_metadata_url = https://idp.example.org/.well-known/openid-configuration
+```
 
-     sudo service apache2 reload
+Optional settings and defaults:
 
+| Setting | Default | Description |
+| --- | --- | --- |
+| `ckanext.pen.idp.scope` | `openid email profile` | OIDC scopes requested during login. |
+| `ckanext.pen.idp.callback` | `/pen/callback` | Callback path registered in CKAN. Configure this path as the redirect URI path at the identity provider. |
+| `ckanext.pen.idp.claim_source` | `id_token` | Source for user claims. `id_token` and `userinfo` are supported by the current implementation. `access_token` is declared but is not decoded as a JWT. |
+| `ckanext.pen.idp.name_claim` | `preferred_username` | Claim mapped to `User.name`. |
+| `ckanext.pen.idp.email_claim` | `email` | Claim mapped to `User.email`. |
+| `ckanext.pen.idp.fullname_claim` | `name` | Claim mapped to `User.fullname`. |
+| `ckanext.pen.idp.groups_claim` | `groups` | Claim containing a list of group or organization names. |
+| `ckanext.pen.idp.autogroup` | `.*` | Regular expression for claim groups that should be created as CKAN organizations and assigned to the user. Set to an empty value to disable automatic joins. |
+| `ckanext.pen.idp.autoungroup` | `.*` | Regular expression for existing organizations that should be removed from the user when missing from the current group claim. Set to an empty value to disable automatic removals. |
 
-## Config settings
+The callback URL sent to the identity provider is generated from CKAN's site URL
+and the configured callback path. For the default callback, register:
 
-None at present
+```text
+https://your-ckan.example.org/pen/callback
+```
 
-**TODO:** Document any optional config settings here. For example:
+## Group Synchronization
 
-	# The minimum number of hours to wait before re-checking a resource
-	# (optional, default: 24).
-	ckanext.pen.some_setting = some_default_value
+When the configured `groups_claim` is present and contains a list of strings,
+`ckanext-pen` compares those values with the user's CKAN organization
+memberships.
 
+Matching values from `autogroup` are created as CKAN organizations when missing,
+and the user is added as a member. Matching values from `autoungroup` are removed
+from the user when they no longer appear in the OIDC claims.
 
-## Developer installation
+## Development
 
-To install ckanext-pen for development, activate your CKAN virtualenv and
-do:
+For development in an existing CKAN environment:
 
-    git clone https://github.com/Github user or organization name/ckanext-pen.git
-    cd ckanext-pen
-    python setup.py develop
-    pip install -r dev-requirements.txt
+```sh
+git clone https://github.com/hkwi/ckanext-pen.git
+cd ckanext-pen
+pip install -e .
+```
 
+The repository also contains a self-contained Docker Compose test environment
+using CKAN 2.11.4, PostgreSQL, Solr, and Redis.
 
 ## Tests
 
-To run the tests, do:
+Run the Docker Compose test suite:
 
-    pytest --ckan-ini=test.ini
+```sh
+docker compose -f docker-compose.test.yml build ckan-test
+docker compose -f docker-compose.test.yml run --rm ckan-test
+docker compose -f docker-compose.test.yml down --volumes --remove-orphans
+```
 
-The suite includes an OIDC e2e test that drives CKAN's `/user/login` route,
-follows the callback, and verifies the resulting user and organization
-membership in the database. It replaces the external identity provider with a
-test double, so no network access is required.
+The test container initializes the CKAN database and runs:
 
-To run only the e2e coverage, do:
+```sh
+pytest -q --ckan-ini=test.ini
+```
 
-    pytest -m e2e --ckan-ini=test.ini
+The suite includes an OIDC end-to-end test that exercises CKAN's `/user/login`
+route, follows the callback, creates a CKAN user from OIDC claims, and verifies
+organization membership synchronization. The identity provider is replaced with a
+test double, so the test itself does not contact an external OIDC provider.
 
-For a self-contained CKAN test environment, run the Docker Compose suite:
+To run only the e2e test in an already prepared CKAN test environment:
 
-    docker compose -f docker-compose.test.yml build ckan-test
-    docker compose -f docker-compose.test.yml run --rm ckan-test
-    docker compose -f docker-compose.test.yml down
+```sh
+pytest -m e2e --ckan-ini=test.ini
+```
 
+## Release
 
-## Releasing a new version of ckanext-pen
+The package metadata lives in `setup.cfg`; update the version there before
+building a release.
 
-If ckanext-pen should be available on PyPI you can follow these steps to publish a new version:
-
-1. Update the version number in the `setup.py` file. See [PEP 440](http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers) for how to choose version numbers.
-
-2. Make sure you have the latest version of necessary packages:
-
-    pip install --upgrade setuptools wheel twine
-
-3. Create a source and binary distributions of the new version:
-
-       python setup.py sdist bdist_wheel && twine check dist/*
-
-   Fix any errors you get.
-
-4. Upload the source distribution to PyPI:
-
-       twine upload dist/*
-
-5. Commit any outstanding changes:
-
-       git commit -a
-       git push
-
-6. Tag the new release of the project on GitHub with the version number from
-   the `setup.py` file. For example if the version number in `setup.py` is
-   0.0.1 then do:
-
-       git tag 0.0.1
-       git push --tags
+```sh
+python -m pip install --upgrade setuptools wheel twine
+python setup.py sdist bdist_wheel
+twine check dist/*
+twine upload dist/*
+```
 
 ## License
 
-[AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html)
+[AGPL-3.0-or-later](https://www.gnu.org/licenses/agpl-3.0.en.html)
