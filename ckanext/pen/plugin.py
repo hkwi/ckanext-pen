@@ -46,6 +46,7 @@ class ConfigKey(str):
 oauth = OAuth()
 bp = Blueprint("pen", __name__)
 ckey = ConfigKey("ckanext.pen")
+callback_route_configured = False
 
 @bp.before_app_request
 def init_oauth():
@@ -140,26 +141,29 @@ class PenPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurable)
 
     def configure(self, config):
+        global callback_route_configured
         self.config = config
 
-        @bp.route(config[ckey.idp.callback]) 
-        @trace_dump
-        @autocommit
-        def callback():
-            idp = oauth.create_client("idp")
-            token = idp.authorize_access_token()
-            session[ckey.idp.token()] = token
-            if config[ckey.idp.claim_source] == "userinfo":
-                session[ckey.idp.userinfo()] = idp.userinfo()
+        if not callback_route_configured:
+            @bp.route(config[ckey.idp.callback])
+            @trace_dump
+            @autocommit
+            def callback():
+                idp = oauth.create_client("idp")
+                token = idp.authorize_access_token()
+                session[ckey.idp.token()] = token
+                if self.config[ckey.idp.claim_source] == "userinfo":
+                    session[ckey.idp.userinfo()] = idp.userinfo()
 
-            self._claims_sync()
+                self._claims_sync()
 
-            came_from = session.pop("came_from", None)
-            if toolkit.h.url_is_local(came_from):
-                return toolkit.redirect_to(came_from)
-            return toolkit.redirect_to(toolkit.url_for(
-                self.config["ckan.auth.route_after_login"]
-            ))
+                came_from = session.pop("came_from", None)
+                if toolkit.h.url_is_local(came_from):
+                    return toolkit.redirect_to(came_from)
+                return toolkit.redirect_to(toolkit.url_for(
+                    self.config["ckan.auth.route_after_login"]
+                ))
+            callback_route_configured = True
     
     plugins.implements(plugins.IAuthenticator)
 
@@ -262,7 +266,7 @@ class PenPlugin(plugins.SingletonPlugin):
             for group in userobj.get_groups():
                 if re.match(autoungroup, group.name):
                     if group.name not in self._claim_groups:
-                        q = model.Session.query(model.Member).filter(
+                        q = model.Session.query(model.Member).filter_by(
                             table_name="user",
                             table_id=userobj.id,
                             group_id=group.id,
