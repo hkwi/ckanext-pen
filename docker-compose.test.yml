@@ -16,7 +16,7 @@ services:
     command: bash docker/test/run-tests.sh
 
   db:
-    image: postgres:16-bookworm
+    image: postgres:18-bookworm
     environment:
       POSTGRES_USER: ckan
       POSTGRES_PASSWORD: ckan
