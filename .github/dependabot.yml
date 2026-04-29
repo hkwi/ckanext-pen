@@ -11,13 +11,13 @@ updates:
           - "*"
 
   - package-ecosystem: docker
-    directory: /
+    directory: /docker/test
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: docker
-    directory: /docker/test
+  - package-ecosystem: docker-compose
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
