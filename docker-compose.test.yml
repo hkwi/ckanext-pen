@@ -1,0 +1,36 @@
+services:
+  ckan-test:
+    build:
+      context: .
+      dockerfile: docker/test/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      solr:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - .:/srv/ckanext-pen
+    working_dir: /srv/ckanext-pen
+    command: bash docker/test/run-tests.sh
+
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: ckan
+      POSTGRES_PASSWORD: ckan
+      POSTGRES_DB: ckan_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ckan -d ckan_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - ./docker/test/postgres-init:/docker-entrypoint-initdb.d:ro
+
+  solr:
+    image: ckan/ckan-solr:2.11-solr9
+
+  redis:
+    image: redis:7-bookworm

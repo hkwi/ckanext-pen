@@ -78,6 +78,21 @@ To run the tests, do:
 
     pytest --ckan-ini=test.ini
 
+The suite includes an OIDC e2e test that drives CKAN's `/user/login` route,
+follows the callback, and verifies the resulting user and organization
+membership in the database. It replaces the external identity provider with a
+test double, so no network access is required.
+
+To run only the e2e coverage, do:
+
+    pytest -m e2e --ckan-ini=test.ini
+
+For a self-contained CKAN test environment, run the Docker Compose suite:
+
+    docker compose -f docker-compose.test.yml build ckan-test
+    docker compose -f docker-compose.test.yml run --rm ckan-test
+    docker compose -f docker-compose.test.yml down
+
 
 ## Releasing a new version of ckanext-pen
 
