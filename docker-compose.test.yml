@@ -33,4 +33,4 @@ services:
     image: ckan/ckan-solr:2.11-solr9
 
   redis:
-    image: redis:7-bookworm
+    image: redis:8-bookworm
