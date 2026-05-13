@@ -30,7 +30,7 @@ services:
       - ./docker/test/postgres-init:/docker-entrypoint-initdb.d:ro
 
   solr:
-    image: ckan/ckan-solr:2.11-solr9
+    image: ckan/ckan-solr:2.12-solr9
 
   redis:
     image: redis:8-bookworm
