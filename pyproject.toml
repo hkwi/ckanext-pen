@@ -1,0 +1,58 @@
+[project]
+name = "ckanext-pen"
+version = "0.1.0"
+description = "CKAN extension that replaces the CKAN login flow with an OpenID Connect login flow"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "AGPL-3.0-or-later"}
+authors = [
+    {name = "Hiroaki KAWAI", email = "hiroaki.kawai@gmail.com"},
+]
+maintainers = [
+    {name = "Hiroaki KAWAI", email = "hiroaki.kawai@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = [
+    "ckan",
+    "ckanext",
+    "openid",
+    "oidc",
+    "sso",
+]
+
+dependencies = [
+    "authlib==1.9.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/hkwi/ckanext-pen"
+Repository = "https://github.com/hkwi/ckanext-pen"
+Issues = "https://github.com/hkwi/ckanext-pen/issues"
+Changelog = "https://github.com/hkwi/ckanext-pen/blob/main/CHANGELOG.md"
+License = "https://www.gnu.org/licenses/agpl-3.0.en.html"
+
+[project.entry-points."ckan.plugins"]
+pen = "ckanext.pen.plugin:PenPlugin"
+
+[project.entry-points."babel.extractors"]
+ckan = "ckan.lib.extract:extract_ckan"
+
+[build-system]
+requires = ["setuptools>=62.6.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["ckanext*"]
+
+[tool.setuptools]
+include-package-data = true
+namespace-packages = ["ckanext"]
+
+[tool.setuptools.dynamic]
+license = {file = "LICENSE"}

@@ -120,15 +120,24 @@ pytest -m e2e --ckan-ini=test.ini
 
 ## Release
 
-The package metadata lives in `setup.cfg`; update the version there before
-building a release.
+The package metadata lives in `pyproject.toml`; update the `version`
+field there before cutting a release.
 
-```sh
-python -m pip install --upgrade setuptools wheel twine
-python setup.py sdist bdist_wheel
-twine check dist/*
-twine upload dist/*
-```
+Releases are tagged as `v{MAJOR}.{MINOR}.{PATCH}` (e.g. `v0.1.0`) and
+publishing to PyPI is automated by
+[.github/workflows/publish-pypi.yml](.github/workflows/publish-pypi.yml):
+pushing a `v**` tag builds the wheel/sdist and uploads them to PyPI
+via [Trusted Publisher](https://docs.pypi.org/trusted_publishers/)
+(no PyPI API token is required in the repository).
+
+One-time setup on the PyPI side (already documented in the workflow):
+
+1. Register the `ckanext-pen` package name on <https://pypi.org/>.
+2. On the package page, enable **Trusted Publisher** for
+   repository `hkwi/ckanext-pen`, workflow `publish-pypi.yml`,
+   environment `pypi`.
+
+The full change history is in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

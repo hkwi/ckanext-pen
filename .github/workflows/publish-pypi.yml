@@ -1,0 +1,69 @@
+name: Publish to PyPI
+
+# Publish to PyPI when a tag is pushed.
+#
+# Prerequisites (one-time, on the PyPI side):
+#   1. Register the `ckanext-pen` package name on https://pypi.org/
+#   2. On the package page, enable "Trusted Publisher"
+#        Repository : hkwi/ckanext-pen
+#        Workflow   : publish-pypi.yml
+#        Environment: pypi
+#      (PyPI will show this exact workflow name; it must match.)
+#
+# With Trusted Publisher, no PyPI API token secret is needed in the repo.
+
+on:
+  push:
+    tags:
+      - 'v**'
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install pypa/build
+        run: python3 -m pip install --user build
+
+      - name: Build a wheel and a source tarball
+        run: python3 -m build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+
+  publish-to-pypi:
+    name: Publish Python distribution on PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ckanext-pen
+    permissions:
+      id-token: write
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.14.2
