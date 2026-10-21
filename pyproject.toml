@@ -54,5 +54,3 @@ include = ["ckanext*"]
 include-package-data = true
 namespace-packages = ["ckanext"]
 
-[tool.setuptools.dynamic]
-license = {file = "LICENSE"}
