@@ -13,7 +13,7 @@ services:
     volumes:
       - .:/srv/ckanext-pen
     working_dir: /srv/ckanext-pen
-    command: bash docker/test/run-tests.sh
+    command: ckanext-pen-run-tests
 
   db:
     image: postgres:18-bookworm

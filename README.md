@@ -11,9 +11,9 @@ group claims into CKAN organizations.
 
 | Component | Version used by this repository |
 | --- | --- |
-| CKAN | 2.11.4 in the Docker test image |
+| CKAN | 2.11.6 in the Docker test image |
 | Python | 3.10 in the Docker test image |
-| Authlib | 1.7.0 |
+| Authlib | 1.9.1 |
 
 CKAN 2.11 is the tested target. Other CKAN versions are not currently covered by
 the test suite.
@@ -89,7 +89,7 @@ pip install -e .
 ```
 
 The repository also contains a self-contained Docker Compose test environment
-using CKAN 2.11.4, PostgreSQL, Solr, and Redis.
+using CKAN 2.11.6, PostgreSQL, Solr, and Redis.
 
 ## Tests
 
