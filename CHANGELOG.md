@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/hkwi/ckanext-pen/compare/v0.1.0...HEAD)
 
+* Test across CKAN 2.10, 2.11, 2.12 via a GitHub Actions matrix
+  (Python follows the matching `ckan/ckan-dev` image per version).
+* README: declare the supported CKAN range as `2.10 - 2.12`.
+
 ## [v0.1.0](https://github.com/hkwi/ckanext-pen/compare/v0.0.1...v0.1.0) - 2026-10-22
 
 * Adopt PEP 621 metadata in `pyproject.toml`; drop `version` and

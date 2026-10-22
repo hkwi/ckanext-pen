@@ -11,9 +11,25 @@ permissions:
 
 jobs:
   docker-compose-e2e:
-    name: CKAN OIDC e2e
+    name: CKAN OIDC e2e (CKAN ${{ matrix.ckan-version }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Target the patch-level release of each CKAN series that this
+          # extension is intended to support. Python version follows the CKAN
+          # Docker image (not an independent matrix axis).
+          - ckan-version: "2.12"
+            ckan-image: ckan/ckan-dev:2.12-py3.14
+          - ckan-version: "2.11"
+            ckan-image: ckan/ckan-dev:2.11-py3.10
+          - ckan-version: "2.10"
+            ckan-image: ckan/ckan-dev:2.10-py3.10
+    env:
+      CKAN_VERSION: ${{ matrix.ckan-version }}
+      CKAN_IMAGE: ${{ matrix.ckan-image }}
 
     steps:
       - name: Checkout
