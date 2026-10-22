@@ -3,7 +3,7 @@ FROM ckan/ckan-dev:2.11.6-py3.10
 USER root
 WORKDIR /srv/ckanext-pen
 
-COPY requirements.txt setup.py setup.cfg README.md LICENSE MANIFEST.in ./
+COPY requirements.txt pyproject.toml setup.py setup.cfg README.md LICENSE MANIFEST.in ./
 COPY ckanext ./ckanext
 RUN pip install --no-cache-dir -e .
 
