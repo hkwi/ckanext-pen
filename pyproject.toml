@@ -52,5 +52,4 @@ include = ["ckanext*"]
 
 [tool.setuptools]
 include-package-data = true
-namespace-packages = ["ckanext"]
 
