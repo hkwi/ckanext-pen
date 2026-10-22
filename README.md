@@ -11,12 +11,14 @@ group claims into CKAN organizations.
 
 | Component | Version used by this repository |
 | --- | --- |
-| CKAN | 2.11.6 in the Docker test image |
-| Python | 3.10 in the Docker test image |
+| CKAN | 2.10, 2.11, 2.12 in the Docker test matrix |
+| Python | follows the CKAN Docker image per version (2.12=3.14, 2.11/2.10=3.10) |
 | Authlib | 1.9.1 |
 
-CKAN 2.11 is the tested target. Other CKAN versions are not currently covered by
-the test suite.
+The supported CKAN range is `2.10 - 2.12`. Each version in this range is
+covered by the GitHub Actions test matrix, which runs the e2e suite against
+the matching `ckan/ckan-dev` image. Versions outside this range are not
+guaranteed.
 
 ## Installation
 
@@ -89,7 +91,8 @@ pip install -e .
 ```
 
 The repository also contains a self-contained Docker Compose test environment
-using CKAN 2.11.6, PostgreSQL, Solr, and Redis.
+using CKAN 2.11.6 by default (the CI matrix runs 2.10, 2.11, 2.12),
+with PostgreSQL, Solr, and Redis.
 
 ## Tests
 

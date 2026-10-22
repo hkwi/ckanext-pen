@@ -167,7 +167,20 @@ class PenPlugin(plugins.SingletonPlugin):
     
     plugins.implements(plugins.IAuthenticator)
 
+    def identify_user(self, user_id: str | None = None):
+        # CKAN 2.12+ resolves the current user through identify_user().
+        # With user_id it restores a logged-in user from the Flask session
+        # cookie (flask_login user_loader); without it we fall back to
+        # identifying from the OpenID Connect session created by callback().
+        user = model.User.get(user_id) if user_id else self._userobj()
+        if user:
+            flask_login.login_user(user)
+            toolkit.g.user = user.name
+        return user
+
     def identify(self):
+        # DEPRECATED in CKAN 2.10/2.12+, still used by CKAN 2.11; kept for
+        # backward compatibility within the supported CKAN range.
         user = self._userobj()
         if user:
             flask_login.login_user(user)

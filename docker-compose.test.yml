@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: docker/test/Dockerfile
+      args:
+        CKAN_IMAGE: ${CKAN_IMAGE:-ckan/ckan-dev:2.11.6-py3.10}
     depends_on:
       db:
         condition: service_healthy
@@ -30,7 +32,7 @@ services:
       - ./docker/test/postgres-init:/docker-entrypoint-initdb.d:ro
 
   solr:
-    image: ckan/ckan-solr:2.12-solr9
+    image: ckan/ckan-solr:${CKAN_VERSION:-2.12}-solr9
 
   redis:
     image: redis:8-bookworm

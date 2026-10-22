@@ -1,4 +1,5 @@
-FROM ckan/ckan-dev:2.11.6-py3.10
+ARG CKAN_IMAGE=ckan/ckan-dev:2.11.6-py3.10
+FROM ${CKAN_IMAGE}
 
 USER root
 WORKDIR /srv/ckanext-pen
