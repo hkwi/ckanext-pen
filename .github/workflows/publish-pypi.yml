@@ -1,6 +1,6 @@
 name: Publish to PyPI
 
-# Publish to PyPI when a tag is pushed.
+# Publish release tags only after their commit is on main and passes main CI.
 #
 # Prerequisites (one-time, on the PyPI side):
 #   1. Register the `ckanext-pen` package name on https://pypi.org/
@@ -20,8 +20,27 @@ on:
 permissions: {}
 
 jobs:
+  verify-release:
+    name: Verify merged release and main CI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout release tag and main history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release eligibility
+        run: python3 .github/scripts/verify-release.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build:
     name: Build distribution
+    needs: [verify-release]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,7 +70,7 @@ jobs:
 
   publish-to-pypi:
     name: Publish Python distribution on PyPI
-    needs: [build]
+    needs: [verify-release, build]
     runs-on: ubuntu-latest
     environment:
       name: pypi
