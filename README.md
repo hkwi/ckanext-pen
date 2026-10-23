@@ -129,9 +129,27 @@ field there before cutting a release.
 Releases are tagged as `v{MAJOR}.{MINOR}.{PATCH}` (e.g. `v0.1.0`) and
 publishing to PyPI is automated by
 [.github/workflows/publish-pypi.yml](.github/workflows/publish-pypi.yml):
-pushing a `v**` tag builds the wheel/sdist and uploads them to PyPI
+pushing an eligible `v**` tag builds the wheel/sdist and uploads them to PyPI
 via [Trusted Publisher](https://docs.pypi.org/trusted_publishers/)
 (no PyPI API token is required in the repository).
+
+Release in this order:
+
+1. Merge the release PR into `main` (including the version/changelog update).
+2. Wait for the **E2E** workflow triggered by that commit's push to `main` to
+   complete successfully, including all CKAN matrix jobs.
+3. Create and push the version tag on that exact tested commit, not the PR head.
+
+Before building or publishing, the release workflow checks that the tagged
+commit is in `main` and that its latest main-push E2E run succeeded. A successful
+PR run is not sufficient. Missing, pending, failed, or unreadable CI results
+block the release. If the tag was pushed before main CI finished, wait for it
+to succeed and re-run the release workflow; do not move an existing release tag.
+These checks apply to tags containing the updated workflow; historical tags
+and workflow runs are not rewritten.
+
+The gate's offline regression tests run as part of E2E and can also be run with
+`python3 -m unittest discover -s .github/tests -v` (no CKAN services required).
 
 One-time setup on the PyPI side (already documented in the workflow):
 
