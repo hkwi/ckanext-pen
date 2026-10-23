@@ -5,8 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/hkwi/ckanext-pen/compare/v0.1.0...HEAD)
+## [Unreleased](https://github.com/hkwi/ckanext-pen/compare/v0.1.1...HEAD)
 
+## [v0.1.1](https://github.com/hkwi/ckanext-pen/compare/v0.1.0...v0.1.1) - 2026-10-23
+
+* Implement CKAN 2.12's `IAuthenticator.identify_user` hook while retaining
+  `identify` for compatibility with CKAN 2.10 and 2.11.
 * Test across CKAN 2.10, 2.11, 2.12 via a GitHub Actions matrix
   (Python follows the matching `ckan/ckan-dev` image per version).
 * README: declare the supported CKAN range as `2.10 - 2.12`.

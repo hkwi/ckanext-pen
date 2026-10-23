@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-pen"
-version = "0.1.0"
+version = "0.1.1"
 description = "CKAN extension that replaces the CKAN login flow with an OpenID Connect login flow"
 readme = "README.md"
 requires-python = ">=3.10"
