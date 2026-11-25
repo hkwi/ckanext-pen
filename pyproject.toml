@@ -27,7 +27,7 @@ keywords = [
 ]
 
 dependencies = [
-    "authlib==1.9.6",
+    "authlib==1.9.10",
 ]
 
 [project.urls]
